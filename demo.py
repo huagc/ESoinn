@@ -7,7 +7,7 @@ from esoinn import ESoinn
 import copy
 
 # generate data
-n = 2000
+n = 5000
 sigma = 0.07
 c = 10 * np.random.rand(n) - 5
 X = np.array([[c[i], np.sin(c[i])+uniform(-0.2, 0.2)] for i in range(len(c))])

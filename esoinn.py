@@ -149,8 +149,8 @@ class ESoinn(BaseEstimator, ClusterMixin):
         class_id = 0
         while len(density_dict) > 0:
             apex = max(density_dict, key=lambda x: density_dict[x])
-            print("len", len(density_dict))
-            print("apex", apex)
+            # print("len", len(density_dict))
+            # print("apex", apex)
             ids = []
             ids.append(apex)
             self.__get_nodes_by_apex(apex, ids, density_dict)

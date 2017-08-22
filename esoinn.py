@@ -327,7 +327,7 @@ class ESoinn(BaseEstimator, ClusterMixin):
         for k in pals.keys():
             pal_indexes.append(k[1])
         # print(len(pal_indexes))
-        sq_dists = np.sum((self.nodes[pal_indexes] ** 2 - np.array([self.nodes[winner_index] * len(pal_indexes)]) ** 2), 1)
+        sq_dists = np.sum((self.nodes[pal_indexes] - np.array([self.nodes[winner_index] * len(pal_indexes)])) ** 2, 1)
         # print(sq_dists)
         mean_adjacent_density = np.mean(np.sqrt(sq_dists))
         print(sq_dists)

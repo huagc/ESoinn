@@ -7,13 +7,23 @@ from esoinn import ESoinn
 import copy
 
 # generate data
-n = 10000
-sigma = 0.07
-c = 10 * np.random.rand(n) - 5
-X = np.array([[c[i], np.sin(c[i])+uniform(-0.2, 0.2)] for i in range(len(c))])
+n = 12000
+sigma = 0.3
+c = 10.0 * np.random.rand(n) - 5.0
+x0 = -7.0
+y0 = 0.0
+x1 = -9.0
+y1 = 0.0
+Y = [[normal(x0, sigma), normal(y0, sigma)] for i in range(int(len(c)/6))]
+X = [[c[i], np.sin(c[i])+uniform(-0.2, 0.2)] for i in range(len(c))]
+Z = [[normal(x1, sigma), normal(y1, sigma)] for i in range(int(len(c)/6))]
+Y.extend(X)
+Y.extend(Z)
+X = np.array(Y)
 
 
 # initialize SOINN
+# s = Soinn()
 s = ESoinn()
 s.fit(X)
 

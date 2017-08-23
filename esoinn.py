@@ -30,6 +30,7 @@ class ESoinn(BaseEstimator, ClusterMixin):
         self.density = []
         self.N = []
         self.won = []
+        self.total_loop = 1
         self.s = []
         self.adjacent_mat = dok_matrix((0, 0), dtype=np.float64)
         self.node_labels = []
@@ -69,11 +70,8 @@ class ESoinn(BaseEstimator, ClusterMixin):
 
         # Algorithm 3.4 (2)
         signal = self.__check_signal(signal)
-        print("输入信号数")
         self.num_signal += 1
-        print(self.num_signal)
-        print("node 个数")
-        print(len(self.nodes))
+        print("Input signal amount:", self.num_signal, "nodes amount", len(self.nodes))
 
         # Algorithm 3.4 (1)
         if len(self.nodes) < 2:
@@ -114,8 +112,10 @@ class ESoinn(BaseEstimator, ClusterMixin):
         if self.num_signal % self.iteration_threshold == 0:
             for i in range(len(self.won)):
                 self.won[i] = False
+                self.N[i] += 1
             self.__separate_subclass()
             self.__delete_noise_nodes()
+            self.total_loop += 1
 
     # checked
     def __combine_subclass(self, winner):
@@ -160,7 +160,7 @@ class ESoinn(BaseEstimator, ClusterMixin):
                 density_dict.pop(i)
             class_id += 1
 
-        print("class_id", class_id)
+        # print("class_id", class_id)
 
     def __get_nodes_by_apex(self, apex, ids, density_dict):
         new_ids = []
@@ -189,8 +189,8 @@ class ESoinn(BaseEstimator, ClusterMixin):
             alpha_0 = self.calculate_alpha(mean_density_0, max_density_0)
             alpha_1 = self.calculate_alpha(mean_density_1, max_density_1)
             min_density = min([self.density[winner[0]], self.density[winner[1]]])
-            print(self.density[winner[0]], self.density[winner[1]])
-            print(mean_density_0, max_density_0, mean_density_1, max_density_1, alpha_0, alpha_1, min_density)
+            # print(self.density[winner[0]], self.density[winner[1]])
+            # print(mean_density_0, max_density_0, mean_density_1, max_density_1, alpha_0, alpha_1, min_density)
             if alpha_0 * max_density_0 < min_density or alpha_1 * max_density_1 < min_density:  # (7),(8)
                 print("True")
                 return True, True
@@ -258,7 +258,7 @@ class ESoinn(BaseEstimator, ClusterMixin):
         self.nodes[-1, :] = signal
         self.winning_times.append(1)
         self.adjacent_mat.resize((n + 1, n + 1))  # ??
-        self.N.append(0)
+        self.N.append(1)
         self.density.append(0)
         self.s.append(0)
         self.won.append(False)
@@ -316,9 +316,9 @@ class ESoinn(BaseEstimator, ClusterMixin):
     # checked, maybe has problem
     def __update_density(self, winner_index):
         self.winning_times[winner_index] += 1
-        if not self.won[winner_index]:
-            self.won[winner_index] = True
-            self.N[winner_index] += 1
+        # if not self.won[winner_index]:
+        #     self.won[winner_index] = True
+        #     self.N[winner_index] += 1
         if self.N[winner_index] == 0:
             raise ValueError
         # print(self.N[winner_index])
@@ -333,7 +333,7 @@ class ESoinn(BaseEstimator, ClusterMixin):
             mean_adjacent_density = np.mean(np.sqrt(sq_dists))
             p = 1.0/((1.0 + mean_adjacent_density) ** 2)
             self.s[winner_index] += p
-            self.density[winner_index] = self.s[winner_index]/self.winning_times[winner_index]
+            self.density[winner_index] = self.s[winner_index]/self.N[winner_index]
 
     # checked
     def __update_adjacent_nodes(self, winner_index, signal):
@@ -381,7 +381,7 @@ class ESoinn(BaseEstimator, ClusterMixin):
             indexes.pop(0)
         self.adjacent_mat.resize((next_n, next_n))
 
-    # 完成
+    # checked
     def __delete_noise_nodes(self):
         n = len(self.winning_times)
         # print(n)

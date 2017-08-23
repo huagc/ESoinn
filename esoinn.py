@@ -41,7 +41,7 @@ class ESoinn(BaseEstimator, ClusterMixin):
         :param X: array-like or ndarray
         """
         self._reset_state()
-        for x in range(20000):
+        for x in range(30000):
             self.input_signal(choice(X))
         # self.labels_ = self.__label_samples(X)
         self.__classify()
@@ -116,7 +116,6 @@ class ESoinn(BaseEstimator, ClusterMixin):
                 self.won[i] = False
             self.__separate_subclass()
             self.__delete_noise_nodes()
-
 
     # checked
     def __combine_subclass(self, winner):
@@ -271,6 +270,7 @@ class ESoinn(BaseEstimator, ClusterMixin):
         indexes = [0] * num
         sq_dists = [0.0] * num
         D = np.sum((self.nodes - np.array([signal] * n)) ** 2, 1)
+        # print("D", D)
         for i in range(num):
             indexes[i] = np.nanargmin(D)
             sq_dists[i] = D[indexes[i]]
@@ -290,7 +290,7 @@ class ESoinn(BaseEstimator, ClusterMixin):
                 pal_indexes = []
                 for k in pals.keys():
                     pal_indexes.append(k[1])
-                sq_dists = np.sum((self.nodes[pal_indexes] - np.array([self.nodes[i] * len(pal_indexes)])) ** 2, 1)
+                sq_dists = np.sum((self.nodes[pal_indexes] - np.array([self.nodes[i]] * len(pal_indexes))) ** 2, 1)
                 sim_thresholds.append(np.max(sq_dists))
         return sim_thresholds
 
@@ -310,12 +310,12 @@ class ESoinn(BaseEstimator, ClusterMixin):
 
     # checked
     def __update_winner(self, winner_index, signal):
-        self.winning_times[winner_index] += 1
         w = self.nodes[winner_index]
         self.nodes[winner_index] = w + (signal - w) / self.winning_times[winner_index]
 
     # checked, maybe has problem
     def __update_density(self, winner_index):
+        self.winning_times[winner_index] += 1
         if not self.won[winner_index]:
             self.won[winner_index] = True
             self.N[winner_index] += 1
@@ -326,16 +326,25 @@ class ESoinn(BaseEstimator, ClusterMixin):
         pal_indexes = []
         for k in pals.keys():
             pal_indexes.append(k[1])
-        # print(len(pal_indexes))
-        sq_dists = np.sum((self.nodes[pal_indexes] - np.array([self.nodes[winner_index] * len(pal_indexes)])) ** 2, 1)
-        # print(sq_dists)
-        mean_adjacent_density = np.mean(np.sqrt(sq_dists))
-        print(sq_dists)
-        print(np.sqrt(sq_dists))
-        print(np.mean(np.sqrt(sq_dists)))
-        p = 1/((1 + mean_adjacent_density) ** 2)
-        self.s[winner_index] += p
-        self.density[winner_index] = self.s[winner_index]/self.winning_times[winner_index]
+        if len(pal_indexes) != 0:
+            # print(len(pal_indexes))
+            sq_dists = np.sum((self.nodes[pal_indexes] - np.array([self.nodes[winner_index]]*len(pal_indexes)))**2, 1)
+            # print(sq_dists)
+            mean_adjacent_density = np.mean(np.sqrt(sq_dists))
+            print("1", np.sum((self.nodes[pal_indexes] - np.array([self.nodes[winner_index]]*len(pal_indexes)))**2, 1))
+            print("1.1",
+                  self.nodes[pal_indexes])
+            print("1.2",
+                  np.array([[self.nodes[winner_index]] * len(pal_indexes)]))
+            print("1.3",
+                  np.array([self.nodes[winner_index]] * len(pal_indexes)))
+            print("2",
+                  (self.nodes[pal_indexes] - np.array([[self.nodes[winner_index]] * len(pal_indexes)])) ** 2)
+            print("3",
+                  self.nodes[pal_indexes] - np.array([[self.nodes[winner_index]] * len(pal_indexes)]))
+            p = 1.0/((1.0 + mean_adjacent_density) ** 2)
+            self.s[winner_index] += p
+            self.density[winner_index] = self.s[winner_index]/self.winning_times[winner_index]
 
     # checked
     def __update_adjacent_nodes(self, winner_index, signal):

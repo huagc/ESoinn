@@ -7,7 +7,7 @@ from esoinn import ESoinn
 import copy
 
 # generate data
-n = 5000
+n = 10000
 sigma = 0.07
 c = 10 * np.random.rand(n) - 5
 X = np.array([[c[i], np.sin(c[i])+uniform(-0.2, 0.2)] for i in range(len(c))])
@@ -42,5 +42,10 @@ plt.plot(X[:, 0], X[:, 1], 'cx')
 for k in s.adjacent_mat.keys():
     plt.plot(nodes[k, 0], nodes[k, 1], 'k')
 plt.plot(nodes[:, 0], nodes[:, 1], 'ro')
+
+
+for i in range(len(s.nodes)):
+    plt.text(s.nodes[i][0], s.nodes[i][1], str(s.density[i]), family='serif', style='italic', ha='right', wrap=True)
+
 plt.grid(True)
 plt.show()

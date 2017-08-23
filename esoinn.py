@@ -42,7 +42,7 @@ class ESoinn(BaseEstimator, ClusterMixin):
         :param X: array-like or ndarray
         """
         self._reset_state()
-        for x in range(15000):
+        for x in range(30000):
             self.input_signal(choice(X))
         # self.labels_ = self.__label_samples(X)
         self.__classify()

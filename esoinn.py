@@ -331,17 +331,6 @@ class ESoinn(BaseEstimator, ClusterMixin):
             sq_dists = np.sum((self.nodes[pal_indexes] - np.array([self.nodes[winner_index]]*len(pal_indexes)))**2, 1)
             # print(sq_dists)
             mean_adjacent_density = np.mean(np.sqrt(sq_dists))
-            print("1", np.sum((self.nodes[pal_indexes] - np.array([self.nodes[winner_index]]*len(pal_indexes)))**2, 1))
-            print("1.1",
-                  self.nodes[pal_indexes])
-            print("1.2",
-                  np.array([[self.nodes[winner_index]] * len(pal_indexes)]))
-            print("1.3",
-                  np.array([self.nodes[winner_index]] * len(pal_indexes)))
-            print("2",
-                  (self.nodes[pal_indexes] - np.array([[self.nodes[winner_index]] * len(pal_indexes)])) ** 2)
-            print("3",
-                  self.nodes[pal_indexes] - np.array([[self.nodes[winner_index]] * len(pal_indexes)]))
             p = 1.0/((1.0 + mean_adjacent_density) ** 2)
             self.s[winner_index] += p
             self.density[winner_index] = self.s[winner_index]/self.winning_times[winner_index]
@@ -354,7 +343,7 @@ class ESoinn(BaseEstimator, ClusterMixin):
             w = self.nodes[i]
             self.nodes[i] = w + (signal - w) / (100 * self.winning_times[i])
 
-    # 通用（需要添加功能，应该已经可以了）
+    # checked
     def __delete_nodes(self, indexes):
         if not indexes:
             return
@@ -369,7 +358,7 @@ class ESoinn(BaseEstimator, ClusterMixin):
         self.s = [self.s[i] for i in remained_indexes]
         self.__delete_nodes_from_adjacent_mat(indexes, n, len(remained_indexes))
 
-    # 通用
+    # checked
     def __delete_nodes_from_adjacent_mat(self, indexes, prev_n, next_n):
         while indexes:
             next_adjacent_mat = dok_matrix((prev_n, prev_n))
@@ -440,4 +429,4 @@ class ESoinn(BaseEstimator, ClusterMixin):
                 need_classified.remove(i)
             class_id += 1
 
-        print("得到类的个数：", class_id)
+        print("Number of classes：", class_id)

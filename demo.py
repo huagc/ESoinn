@@ -8,11 +8,11 @@ from random import choice
 
 # generate data
 n = 12000
-sigma = 0.5
+sigma = 0.6
 c = 10.0 * np.random.rand(n) - 5.0
 x0 = -7.0
 y0 = 0.0
-x1 = -10.0
+x1 = -10.5
 y1 = 0.0
 Y = [[normal(x0, sigma), normal(y0, sigma)] for i in range(int(len(c)/5))]
 X = [[c[i], np.sin(c[i])+uniform(-0.2, 0.2)] for i in range(len(c))]
@@ -44,8 +44,8 @@ for k in s.adjacent_mat.keys():
 color = ['black', 'red', 'saddlebrown', 'skyblue', 'magenta', 'green', 'gold']
 
 # label density
-for i in range(len(s.nodes)):
-    plt.text(s.nodes[i][0], s.nodes[i][1], str(s.density[i]), family='serif', style='italic', ha='right', wrap=True)
+# for i in range(len(s.nodes)):
+#     plt.text(s.nodes[i][0], s.nodes[i][1], str(s.density[i]), family='serif', style='italic', ha='right', wrap=True)
 
 color_dict = {}
 

@@ -4,7 +4,7 @@ from numpy.random import normal
 from numpy.random import uniform
 from soinn import Soinn
 from esoinn import ESoinn
-import copy
+from random import choice
 
 # generate data
 n = 12000
@@ -50,12 +50,23 @@ print("end")
 plt.plot(X[:, 0], X[:, 1], 'cx')
 
 for k in s.adjacent_mat.keys():
-    plt.plot(nodes[k, 0], nodes[k, 1], 'k')
-plt.plot(nodes[:, 0], nodes[:, 1], 'ro')
+    plt.plot(nodes[k, 0], nodes[k, 1], 'k', c='blue')
+# plt.plot(nodes[:, 0], nodes[:, 1], 'ro')
 
+color = ['black', 'red', 'saddlebrown', 'skyblue', 'magenta', 'green', 'gold']
+
+# for i in range(len(s.nodes)):
+#     plt.text(s.nodes[i][0], s.nodes[i][1], str(s.density[i]), family='serif', style='italic', ha='right', wrap=True)
+
+color_dict = {}
+
+print(len(s.nodes))
+print(len(s.node_labels))
 
 for i in range(len(s.nodes)):
-    plt.text(s.nodes[i][0], s.nodes[i][1], str(s.density[i]), family='serif', style='italic', ha='right', wrap=True)
+    if not s.node_labels[i] in color_dict:
+        color_dict[s.node_labels[i]] = choice(color)
+    plt.plot(s.nodes[i][0], s.nodes[i][1], 'ro', c=color_dict[s.node_labels[i]])
 
 plt.grid(True)
 plt.show()

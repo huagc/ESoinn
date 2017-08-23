@@ -425,7 +425,7 @@ class ESoinn(BaseEstimator, ClusterMixin):
             indexes.append(index)
             self.__get_connected_node(index, indexes)
             for i in indexes:
-                self.node_labels = class_id
+                self.node_labels[i] = class_id
                 need_classified.remove(i)
             class_id += 1
 

@@ -42,7 +42,7 @@ class ESoinn(BaseEstimator, ClusterMixin):
         :param X: array-like or ndarray
         """
         self._reset_state()
-        for x in range(30000):
+        for x in range(15000):
             self.input_signal(choice(X))
         # self.labels_ = self.__label_samples(X)
         self.__classify()
@@ -71,7 +71,6 @@ class ESoinn(BaseEstimator, ClusterMixin):
         # Algorithm 3.4 (2)
         signal = self.__check_signal(signal)
         self.num_signal += 1
-        print("Input signal amount:", self.num_signal, "nodes amount", len(self.nodes))
 
         # Algorithm 3.4 (1)
         if len(self.nodes) < 2:
@@ -113,6 +112,7 @@ class ESoinn(BaseEstimator, ClusterMixin):
             for i in range(len(self.won)):
                 self.won[i] = False
                 self.N[i] += 1
+            print("Input signal amount:", self.num_signal, "nodes amount", len(self.nodes))
             self.__separate_subclass()
             self.__delete_noise_nodes()
             self.total_loop += 1
@@ -130,7 +130,7 @@ class ESoinn(BaseEstimator, ClusterMixin):
     def __remove_old_edges(self):
         for i in list(self.adjacent_mat.keys()):
             if self.adjacent_mat[i] > self.max_edge_age + 1:
-                print("Edge removed")
+                # print("Edge removed")
                 self.adjacent_mat.pop((i[0], i[1]))
 
     # checked
@@ -192,7 +192,7 @@ class ESoinn(BaseEstimator, ClusterMixin):
             # print(self.density[winner[0]], self.density[winner[1]])
             # print(mean_density_0, max_density_0, mean_density_1, max_density_1, alpha_0, alpha_1, min_density)
             if alpha_0 * max_density_0 < min_density or alpha_1 * max_density_1 < min_density:  # (7),(8)
-                print("True")
+                # print("True")
                 return True, True
             else:
                 return False, False
@@ -264,7 +264,7 @@ class ESoinn(BaseEstimator, ClusterMixin):
         self.won.append(False)
         self.node_labels.append(self.INITIAL_LABEL)
 
-    # 通用
+    # checked
     def __find_nearest_nodes(self, num: int, signal: np.ndarray):
         n = self.nodes.shape[0]
         indexes = [0] * num
@@ -395,7 +395,7 @@ class ESoinn(BaseEstimator, ClusterMixin):
                 noise_indexes.append(i)
             elif len(self.adjacent_mat[i, :]) == 0:
                 noise_indexes.append(i)
-        print("移除", len(noise_indexes), "个")
+        print("Removed noise node:", len(noise_indexes))
         self.__delete_nodes(noise_indexes)
 
     def __get_connected_node(self, index, indexes):

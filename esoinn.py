@@ -14,7 +14,7 @@ class ESoinn(BaseEstimator, ClusterMixin):
 
     INITIAL_LABEL = -1
 
-    def __init__(self, dim=2, max_edge_age=100, iteration_threshold=200, c1=0.001, c2=1.0):
+    def __init__(self, dim=2, max_edge_age=100, iteration_threshold=100, c1=0.001, c2=1.0):
         self.dim = dim
         self.iteration_threshold = iteration_threshold
         self.c1 = c1

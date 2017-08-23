@@ -8,11 +8,11 @@ from random import choice
 
 # generate data
 n = 12000
-sigma = 0.4
+sigma = 0.5
 c = 10.0 * np.random.rand(n) - 5.0
 x0 = -7.0
 y0 = 0.0
-x1 = -9.0
+x1 = -10.0
 y1 = 0.0
 Y = [[normal(x0, sigma), normal(y0, sigma)] for i in range(int(len(c)/5))]
 X = [[c[i], np.sin(c[i])+uniform(-0.2, 0.2)] for i in range(len(c))]

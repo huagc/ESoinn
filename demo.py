@@ -7,16 +7,16 @@ from esoinn import ESoinn
 from random import choice
 
 # generate data
-n = 12000
-sigma = 0.6
+n = 10000
+sigma = 0.02
 c = 10.0 * np.random.rand(n) - 5.0
-x0 = -7.0
+x0 = -7.05
 y0 = 0.0
-x1 = -10.5
+x1 = -7.155
 y1 = 0.0
-Y = [[normal(x0, sigma), normal(y0, sigma)] for i in range(int(len(c)/5))]
-X = [[c[i], np.sin(c[i])+uniform(-0.2, 0.2)] for i in range(len(c))]
-Z = [[normal(x1, sigma), normal(y1, sigma)] for i in range(int(len(c)/5))]
+Y = [[normal(x0, sigma), normal(y0, sigma)] for i in range(int(len(c)/3))]
+X = [[c[i]/10 - 6.25, np.sin(c[i])/10+uniform(-0.02, 0.02)] for i in range(len(c))]
+Z = [[normal(x1, sigma), normal(y1, sigma)] for i in range(int(len(c)/3))]
 Y.extend(X)
 Y.extend(Z)
 X = np.array(Y)
@@ -45,7 +45,8 @@ color = ['black', 'red', 'saddlebrown', 'skyblue', 'magenta', 'green', 'gold']
 
 # label density
 # for i in range(len(s.nodes)):
-#     plt.text(s.nodes[i][0], s.nodes[i][1], str(s.density[i]), family='serif', style='italic', ha='right', wrap=True)
+#     str_tmp = str(s.density[i]) + " " + str(s.N[i])
+#     plt.text(s.nodes[i][0], s.nodes[i][1], str_tmp, family='serif', style='italic', ha='right', wrap=True)
 
 color_dict = {}
 

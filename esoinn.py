@@ -14,7 +14,7 @@ class ESoinn(BaseEstimator, ClusterMixin):
 
     INITIAL_LABEL = -1
 
-    def __init__(self, dim=2, max_edge_age=100, iteration_threshold=100, c1=0.001, c2=1.0):
+    def __init__(self, dim=2, max_edge_age=50, iteration_threshold=200, c1=0.001, c2=1.0):
         self.dim = dim
         self.iteration_threshold = iteration_threshold
         self.c1 = c1
@@ -29,6 +29,7 @@ class ESoinn(BaseEstimator, ClusterMixin):
         self.winning_times = []
         self.density = []
         self.N = []
+        # if active
         self.won = []
         self.total_loop = 1
         self.s = []
@@ -110,8 +111,8 @@ class ESoinn(BaseEstimator, ClusterMixin):
         # Algorithm 3.4 (10)
         if self.num_signal % self.iteration_threshold == 0:
             for i in range(len(self.won)):
-                self.won[i] = False
-                self.N[i] += 1
+                if self.won[i]:
+                    self.N[i] += 1
             print("Input signal amount:", self.num_signal, "nodes amount", len(self.nodes))
             self.__separate_subclass()
             self.__delete_noise_nodes()
@@ -316,9 +317,6 @@ class ESoinn(BaseEstimator, ClusterMixin):
     # checked, maybe has problem
     def __update_density(self, winner_index):
         self.winning_times[winner_index] += 1
-        # if not self.won[winner_index]:
-        #     self.won[winner_index] = True
-        #     self.N[winner_index] += 1
         if self.N[winner_index] == 0:
             raise ValueError
         # print(self.N[winner_index])
@@ -333,7 +331,10 @@ class ESoinn(BaseEstimator, ClusterMixin):
             mean_adjacent_density = np.mean(np.sqrt(sq_dists))
             p = 1.0/((1.0 + mean_adjacent_density) ** 2)
             self.s[winner_index] += p
-            self.density[winner_index] = self.s[winner_index]/self.N[winner_index]
+            self.density[winner_index] = self.s[winner_index]/self.total_loop
+
+        if self.s[winner_index] > 0:
+            self.won[winner_index] = True
 
     # checked
     def __update_adjacent_nodes(self, winner_index, signal):

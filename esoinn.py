@@ -2,6 +2,11 @@
 # This software is released under the MIT License.
 # http://opensource.org/licenses/mit-license.php
 
+"""
+E-SOINN in Python 3
+Version 1.0
+"""
+
 from typing import overload
 import numpy as np
 from scipy.sparse import dok_matrix
@@ -43,22 +48,12 @@ class ESoinn(BaseEstimator, ClusterMixin):
         :param X: array-like or ndarray
         """
         self._reset_state()
-        for x in range(30000):
+        # choose 50000 signals randomly
+        for x in range(50000):
             self.input_signal(choice(X))
         # self.labels_ = self.__label_samples(X)
         self.__classify()
         return self
-
-    def fit_predict(self, X, y=None):
-        """
-        train data and predict cluster index for each sample.
-        :param X: array-like or ndarray
-        :rtype list:
-        :return:
-            cluster index for each sample. if a sample is noise, its index is
-            Soinn.NOISE_LABEL.
-        """
-        return self.fit(X).labels_
 
     def input_signal(self, signal: np.ndarray):
         """
@@ -168,7 +163,7 @@ class ESoinn(BaseEstimator, ClusterMixin):
         pals = self.adjacent_mat[apex]
         for k in pals.keys():
             i = k[1]
-            if self.density[i] <= self.density[apex] and i in density_dict:
+            if self.density[i] <= self.density[apex] and i in density_dict and i not in ids:
                 ids.append(i)
                 new_ids.append(i)
         if len(new_ids) != 0:

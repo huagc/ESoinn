@@ -13,10 +13,10 @@ from scipy.sparse import dok_matrix
 from sklearn.base import BaseEstimator, ClusterMixin
 from random import choice
 import matplotlib.pyplot as plt
+import threading
 
 
 class ESoinn(BaseEstimator, ClusterMixin):
-
     INITIAL_LABEL = -1
 
     def __init__(self, dim=2, max_edge_age=50, iteration_threshold=200, c1=0.001, c2=1.0):
@@ -41,6 +41,7 @@ class ESoinn(BaseEstimator, ClusterMixin):
         self.adjacent_mat = dok_matrix((0, 0), dtype=np.float64)
         self.node_labels = []
         self.labels_ = []
+        self.sigs = []
 
     def fit(self, X):
         """
@@ -53,6 +54,7 @@ class ESoinn(BaseEstimator, ClusterMixin):
             self.input_signal(choice(X))
         # self.labels_ = self.__label_samples(X)
         self.__classify()
+        plt.show()
         return self
 
     def input_signal(self, signal: np.ndarray):
@@ -63,10 +65,10 @@ class ESoinn(BaseEstimator, ClusterMixin):
         :param signal: A new input signal
         :return:
         """
-
         # Algorithm 3.4 (2)
         signal = self.__check_signal(signal)
         self.num_signal += 1
+        self.sigs.append(signal)
 
         # Algorithm 3.4 (1)
         if len(self.nodes) < 2:
@@ -93,7 +95,7 @@ class ESoinn(BaseEstimator, ClusterMixin):
             # Algorithm 3.4 (5)(a) need combine subclasses
             if need_combine:
                 self.__combine_subclass(winner)
-            # Algorithm 3.4 (6) checked, maybe has problem
+            # Algorithm 3.4 (6) checked, maybe fixed problem N
             self.__update_density(winner[0])
             # Algorithm 3.4 (7)(8)
             self.__update_winner(winner[0], signal)
@@ -104,14 +106,20 @@ class ESoinn(BaseEstimator, ClusterMixin):
         self.__remove_old_edges()
 
         # Algorithm 3.4 (10)
-        if self.num_signal % self.iteration_threshold == 0:
+        if self.num_signal % self.iteration_threshold == 0 and self.num_signal > 1:
+            print(self.won)
             for i in range(len(self.won)):
                 if self.won[i]:
                     self.N[i] += 1
+            for i in range(len(self.won)):
+                self.won[i] = False
             print("Input signal amount:", self.num_signal, "nodes amount", len(self.nodes))
             self.__separate_subclass()
             self.__delete_noise_nodes()
             self.total_loop += 1
+            self.__classify()
+            threading.Thread(self.plot_NN())
+            self.sigs.clear()
 
     # checked
     def __combine_subclass(self, winner):
@@ -135,6 +143,7 @@ class ESoinn(BaseEstimator, ClusterMixin):
             self.adjacent_mat.pop((ids[0], ids[1]))
             self.adjacent_mat.pop((ids[1], ids[0]))
 
+    # Algorithm 3.1
     def __separate_subclass(self):
         # find all local apex
         density_dict = {}
@@ -156,8 +165,6 @@ class ESoinn(BaseEstimator, ClusterMixin):
                 density_dict.pop(i)
             class_id += 1
 
-        # print("class_id", class_id)
-
     def __get_nodes_by_apex(self, apex, ids, density_dict):
         new_ids = []
         pals = self.adjacent_mat[apex]
@@ -175,7 +182,7 @@ class ESoinn(BaseEstimator, ClusterMixin):
     # Algorithm 3.2, checked
     def __need_add_edge(self, winner):
         if self.node_labels[winner[0]] == self.INITIAL_LABEL or \
-                        self.node_labels[winner[1]] == self.INITIAL_LABEL:
+                self.node_labels[winner[1]] == self.INITIAL_LABEL:
             return True, False
         elif self.node_labels[winner[0]] == self.node_labels[winner[1]]:
             return True, False
@@ -309,11 +316,11 @@ class ESoinn(BaseEstimator, ClusterMixin):
         w = self.nodes[winner_index]
         self.nodes[winner_index] = w + (signal - w) / self.winning_times[winner_index]
 
-    # checked, maybe has problem
+    # checked, maybe fixed the problem
     def __update_density(self, winner_index):
         self.winning_times[winner_index] += 1
-        if self.N[winner_index] == 0:
-            raise ValueError
+        # if self.N[winner_index] == 0:
+        #     raise ValueError
         # print(self.N[winner_index])
         pals = self.adjacent_mat[winner_index]
         pal_indexes = []
@@ -321,12 +328,16 @@ class ESoinn(BaseEstimator, ClusterMixin):
             pal_indexes.append(k[1])
         if len(pal_indexes) != 0:
             # print(len(pal_indexes))
-            sq_dists = np.sum((self.nodes[pal_indexes] - np.array([self.nodes[winner_index]]*len(pal_indexes)))**2, 1)
+            sq_dists = np.sum((self.nodes[pal_indexes] - np.array([self.nodes[winner_index]] * len(pal_indexes))) ** 2,
+                              1)
             # print(sq_dists)
             mean_adjacent_density = np.mean(np.sqrt(sq_dists))
-            p = 1.0/((1.0 + mean_adjacent_density) ** 2)
+            p = 1.0 / ((1.0 + mean_adjacent_density) ** 2)
             self.s[winner_index] += p
-            self.density[winner_index] = self.s[winner_index]/self.total_loop
+            if self.N[winner_index] == 0:
+                self.density[winner_index] = self.s[winner_index]
+            else:
+                self.density[winner_index] = self.s[winner_index] / self.N[winner_index]
 
         if self.s[winner_index] > 0:
             self.won[winner_index] = True
@@ -426,3 +437,23 @@ class ESoinn(BaseEstimator, ClusterMixin):
             class_id += 1
 
         print("Number of classes：", class_id)
+
+    def plot_NN(self):
+        plt.cla()
+        # for k in self.sigs:
+        #     plt.plot(k[0], k[1], 'cx')
+        for k in self.adjacent_mat.keys():
+            plt.plot(self.nodes[k, 0], self.nodes[k, 1], 'k', c='blue')
+        # plt.plot(nodes[:, 0], nodes[:, 1], 'ro')
+
+        color = ['black', 'red', 'saddlebrown', 'skyblue', 'magenta', 'green', 'gold']
+
+        color_dict = {}
+
+        for i in range(len(self.nodes)):
+            if not self.node_labels[i] in color_dict:
+                color_dict[self.node_labels[i]] = choice(color)
+            plt.plot(self.nodes[i][0], self.nodes[i][1], 'ro', c=color_dict[self.node_labels[i]])
+
+        plt.grid(True)
+        plt.pause(0.05)
